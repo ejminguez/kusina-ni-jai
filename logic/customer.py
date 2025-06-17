@@ -67,6 +67,10 @@ class CustomerSystem:
         self.last_spawn_time = pygame.time.get_ticks()
         self.customer_names = FILIPINO_NAMES if FILIPINO_NAMES else ["Alex", "Jamie", "Casey", "Jordan", "Taylor"]
         
+        # Difficulty scaling
+        self.difficulty_multiplier = 1.0  # Starts at normal difficulty
+        self.day_count = 1  # Track days for difficulty scaling
+        
     def update(self):
         """Update all customers and spawn new ones if needed
         
@@ -98,8 +102,10 @@ class CustomerSystem:
         # Choose a random name
         name = random.choice(self.customer_names)
         
-        # Set patience based on difficulty
-        patience = random.randint(MIN_PATIENCE, MAX_PATIENCE)
+        # Set patience based on difficulty (adjusted by difficulty multiplier)
+        base_patience = random.randint(MIN_PATIENCE, MAX_PATIENCE)
+        adjusted_patience = max(10, int(base_patience / self.difficulty_multiplier))  # Lower patience as difficulty increases
+        patience = adjusted_patience
         
         # Choose an order
         if random.random() < KNOWN_RECIPE_CHANCE:  # Chance for known recipe
@@ -171,3 +177,16 @@ class CustomerSystem:
             self.customers.remove(customer)
             
         return completed
+        
+    def new_day(self):
+        """Update difficulty for a new day"""
+        self.day_count += 1
+        # Gradually increase difficulty over time
+        self.difficulty_multiplier = 1.0 + (self.day_count - 1) * 0.1  # 10% harder each day
+        
+    def reset(self):
+        """Reset customer system to default state"""
+        self.customers.clear()
+        self.difficulty_multiplier = 1.0
+        self.day_count = 1
+        self.last_spawn_time = pygame.time.get_ticks()

@@ -64,7 +64,7 @@ class RecipeSystem:
         default_recipes = [
             Recipe("Fried Rice", ["rice", "egg", "garlic", "onion"], ["pan"], 60, 1),
             Recipe("Scrambled Eggs", ["egg"], ["pan"], 30, 1),
-            Recipe("Tomato Omelette", ["egg", "tomato", "onion"], ["pan"], 45, 2),
+            Recipe("Tomato Omelette", ["egg", "tomato", "onion"], ["pan"], 45, 1),
             Recipe("Garlic Rice", ["rice", "garlic"], ["pot"], 40, 1)
         ]
         
@@ -168,3 +168,18 @@ class RecipeSystem:
         if recipes:
             return random.choice(recipes)
         return None
+        
+    def reset(self):
+        """Reset recipe system to default state"""
+        # Delete the recipes file if it exists
+        if os.path.exists(RECIPES_FILE):
+            try:
+                os.remove(RECIPES_FILE)
+            except Exception as e:
+                print(f"Error deleting recipes file: {e}")
+                
+        # Clear recipes dictionary
+        self.recipes = {}
+        
+        # Recreate default recipes
+        self._create_default_recipes()

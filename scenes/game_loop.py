@@ -7,26 +7,28 @@ from ui.text import TextRenderer
 from ui.animation_manager import AnimationManager, EasingAnimation
 from config import (
     SCREEN_WIDTH, SCREEN_HEIGHT, BLACK, GREEN, BLUE, LIGHT_GRAY,
-    MAX_CONSECUTIVE_LOST_CUSTOMERS
+    MAX_CONSECUTIVE_LOST_CUSTOMERS, PASTEL_COLORS
 )
 
 class GameScene:
-    def __init__(self, player, customer_system, sprite_manager=None):
+    def __init__(self, player, customer_system, sprite_manager=None, game_instance=None):
         self.player = player
         self.customer_system = customer_system
         self.sprite_manager = sprite_manager
+        self.game_instance = game_instance  # Reference to the main game for day/time
         self.text_renderer = TextRenderer()
         
         # Animation manager
         self.animation_manager = AnimationManager()
         self._setup_animations()
         
-        # UI elements
-        self.cooking_button = Button(50, 600, 150, 50, "Cook", GREEN)
-        self.upgrade_button = Button(220, 600, 150, 50, "Upgrades", BLUE)
-        self.recipe_book_button = Button(390, 600, 150, 50, "Recipe Book")
-        self.profile_button = Button(560, 600, 150, 50, "Profile")
-        self.save_button = Button(730, 600, 150, 50, "Save Game")
+        # UI elements - moved to bottom of screen
+        button_y = SCREEN_HEIGHT - 70
+        self.cooking_button = Button(50, button_y, 150, 50, "Cook", GREEN)
+        self.upgrade_button = Button(220, button_y, 150, 50, "Upgrades", BLUE)
+        self.recipe_book_button = Button(390, button_y, 150, 50, "Recipe Book")
+        self.profile_button = Button(560, button_y, 150, 50, "Profile")
+        self.save_button = Button(730, button_y, 150, 50, "Save Game")
         
         # Menu buttons
         self.menu_button = Button(SCREEN_WIDTH - 120, 20, 100, 30, "Menu")
@@ -45,6 +47,10 @@ class GameScene:
         
         # Customer animations
         self.customer_animations = {}
+        
+        # Show quote animation
+        self.show_quote = True
+        self.quote_timer = 5.0  # Show quote for 5 seconds
         
     def _setup_animations(self):
         """Set up animations"""
@@ -72,6 +78,14 @@ class GameScene:
             False
         )
         
+        # Quote animation
+        self.animation_manager.create_easing_animation(
+            "quote_fade", 
+            1.0, 
+            EasingAnimation.EASING_EASE_IN_OUT, 
+            True  # Make it loop for continuous fading
+        )
+        
     def handle_events(self, events):
         """Handle events for the game scene
         
@@ -81,6 +95,14 @@ class GameScene:
         Returns:
             str or None: Next scene name if transitioning, None otherwise
         """
+        # Skip event handling during quote display
+        if self.show_quote:
+            for event in events:
+                if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN:
+                    self.show_quote = False
+                    self.quote_timer = 0
+            return None
+            
         mouse_pos = pygame.mouse.get_pos()
         
         # If pause menu is active, only handle pause menu events
@@ -131,6 +153,9 @@ class GameScene:
                 
             if self.save_button.is_clicked(mouse_pos, event):
                 self.player.save_player_data()
+                # Save game state
+                if self.game_instance:
+                    self.game_instance.save_game_state()
                 self.show_message("Game saved!", 2.0)
                 
             if self.menu_button.is_clicked(mouse_pos, event):
@@ -158,6 +183,13 @@ class GameScene:
         """
         # Update animations
         self.animation_manager.update(dt)
+        
+        # Update quote timer
+        if self.show_quote:
+            self.quote_timer -= dt
+            if self.quote_timer <= 0:
+                self.show_quote = False
+            return [], None
         
         # Don't update if paused
         if self.paused:
@@ -196,6 +228,13 @@ class GameScene:
             # Reset lost customer counter on successful order
             self.player.reset_lost_customers()
             
+            # Advance time when serving a customer (15 minutes)
+            if self.game_instance:
+                day_ended = self.game_instance.advance_time(0.25)
+                if day_ended:
+                    self.show_quote = True
+                    self.quote_timer = 5.0
+            
         return events, None
         
     def show_message(self, message, duration=2.0):
@@ -227,6 +266,10 @@ class GameScene:
         
         # Render player info
         self._render_player_info(screen)
+        
+        # Render day and time info
+        if self.game_instance:
+            self._render_day_time(screen)
         
         # Render buttons
         self.cooking_button.draw(screen)
@@ -266,6 +309,153 @@ class GameScene:
         # Render pause menu if active
         if self.pause_menu_active:
             self._render_pause_menu(screen)
+            
+        # Render daily quote if active
+        if self.show_quote and self.game_instance and hasattr(self.game_instance, 'current_quote'):
+            self._render_daily_quote(screen)
+            
+    def _render_day_time(self, screen):
+        """Render the day and time information
+        
+        Args:
+            screen: Pygame surface to render on
+        """
+        # Draw day number
+        self.text_renderer.render_text(
+            screen,
+            f"Day {self.game_instance.day}",
+            "medium",
+            BLACK,
+            SCREEN_WIDTH - 150,
+            70,
+            "center"
+        )
+        
+        # Draw current time
+        self.text_renderer.render_text(
+            screen,
+            self.game_instance.get_formatted_time(),
+            "medium",
+            BLACK,
+            SCREEN_WIDTH - 150,
+            100,
+            "center"
+        )
+        
+        # Draw time progress bar
+        progress = self.game_instance.get_day_progress()
+        bar_width = 200
+        bar_height = 10
+        bar_x = SCREEN_WIDTH - 250
+        bar_y = 130
+        
+        # Background bar
+        pygame.draw.rect(screen, (200, 200, 200), (bar_x, bar_y, bar_width, bar_height))
+        
+        # Progress bar
+        pygame.draw.rect(screen, PASTEL_COLORS[2], (bar_x, bar_y, int(bar_width * progress), bar_height))
+        pygame.draw.rect(screen, BLACK, (bar_x, bar_y, bar_width, bar_height), 1)
+        
+        # Draw start and end times
+        self.text_renderer.render_text(
+            screen,
+            "8:00 AM",
+            "small",
+            BLACK,
+            bar_x,
+            bar_y + 20,
+            "left"
+        )
+        
+        self.text_renderer.render_text(
+            screen,
+            "4:00 PM",
+            "small",
+            BLACK,
+            bar_x + bar_width,
+            bar_y + 20,
+            "right"
+        )
+            
+    def _render_daily_quote(self, screen):
+        """Render the daily quote overlay
+        
+        Args:
+            screen: Pygame surface to render on
+        """
+        # Safety check
+        if not self.game_instance or not hasattr(self.game_instance, 'current_quote'):
+            return
+            
+        # Get quote animation progress
+        quote_anim = self.animation_manager.get_animation("quote_fade")
+        progress = quote_anim.get_progress() if quote_anim else 1.0
+        
+        # Calculate opacity based on time remaining
+        fade_time = 1.0  # Fade in/out time in seconds
+        if self.quote_timer < fade_time:
+            opacity = self.quote_timer / fade_time
+        elif self.quote_timer > 4.0:  # 5.0 - fade_time
+            opacity = (5.0 - self.quote_timer) / fade_time
+        else:
+            opacity = 1.0
+            
+        # Semi-transparent overlay
+        overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, int(180 * opacity)))  # Black with alpha
+        screen.blit(overlay, (0, 0))
+        
+        # Draw day number
+        self.text_renderer.render_text(
+            screen,
+            f"Day {self.game_instance.day}",
+            "large",
+            (255, 255, 255, int(255 * opacity)),
+            SCREEN_WIDTH // 2,
+            SCREEN_HEIGHT // 2 - 100,
+            "center"
+        )
+        
+        # Draw quote
+        quote = self.game_instance.current_quote
+        
+        # Split quote into multiple lines if needed
+        words = quote.split()
+        lines = []
+        current_line = ""
+        
+        for word in words:
+            if len(current_line + " " + word) <= 50:
+                current_line += " " + word if current_line else word
+            else:
+                lines.append(current_line)
+                current_line = word
+                
+        if current_line:
+            lines.append(current_line)
+            
+        # Draw each line
+        for i, line in enumerate(lines):
+            self.text_renderer.render_text(
+                screen,
+                line,
+                "medium",
+                (255, 255, 255, int(255 * opacity)),
+                SCREEN_WIDTH // 2,
+                SCREEN_HEIGHT // 2 - 30 + i * 30,
+                "center"
+            )
+            
+        # Draw tap to continue message
+        self.text_renderer.render_text(
+            screen,
+            "Tap to continue",
+            "small",
+            (255, 255, 255, int(255 * opacity)),
+            SCREEN_WIDTH // 2,
+            SCREEN_HEIGHT // 2 + 100,
+            "center"
+        )
             
     def _render_pause_menu(self, screen):
         """Render the pause menu overlay

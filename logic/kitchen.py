@@ -42,6 +42,10 @@ class Kitchen:
             
     def _create_defaults(self):
         """Create default ingredients and tools"""
+        # Clear existing data
+        self.ingredients = {}
+        self.tools = {}
+        
         # Default ingredients
         for ingredient in DEFAULT_INGREDIENTS:
             self.ingredients[ingredient] = {
@@ -158,3 +162,15 @@ class Kitchen:
             self.save_ingredients_and_tools()
             return True, cost
         return False, 0
+        
+    def reset(self):
+        """Reset kitchen to default state"""
+        # Delete the ingredients file if it exists
+        if os.path.exists(INGREDIENTS_FILE):
+            try:
+                os.remove(INGREDIENTS_FILE)
+            except Exception as e:
+                print(f"Error deleting ingredients file: {e}")
+                
+        # Recreate defaults
+        self._create_defaults()

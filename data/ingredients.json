@@ -4,205 +4,61 @@
       "name": "rice",
       "cost": 0,
       "unlocked": true,
-      "category": "grain"
+      "category": "basic"
     },
     {
       "name": "egg",
       "cost": 0,
       "unlocked": true,
-      "category": "protein"
+      "category": "basic"
     },
     {
       "name": "tomato",
       "cost": 0,
       "unlocked": true,
-      "category": "vegetable"
+      "category": "basic"
     },
     {
       "name": "onion",
       "cost": 0,
       "unlocked": true,
-      "category": "vegetable"
+      "category": "basic"
     },
     {
       "name": "garlic",
       "cost": 0,
       "unlocked": true,
-      "category": "vegetable"
+      "category": "basic"
     },
     {
       "name": "chicken",
       "cost": 50,
-      "unlocked": true,
-      "category": "protein"
+      "unlocked": false,
+      "category": "advanced"
     },
     {
       "name": "beef",
       "cost": 50,
       "unlocked": true,
-      "category": "protein"
+      "category": "advanced"
     },
     {
       "name": "carrot",
       "cost": 50,
-      "unlocked": true,
-      "category": "vegetable"
+      "unlocked": false,
+      "category": "advanced"
     },
     {
       "name": "bell pepper",
       "cost": 50,
-      "unlocked": true,
-      "category": "vegetable"
+      "unlocked": false,
+      "category": "advanced"
     },
     {
       "name": "potato",
       "cost": 50,
       "unlocked": true,
-      "category": "vegetable"
-    },
-    {
-      "name": "pork",
-      "cost": 60,
-      "unlocked": true,
-      "category": "protein"
-    },
-    {
-      "name": "vinegar",
-      "cost": 30,
-      "unlocked": true,
-      "category": "condiment"
-    },
-    {
-      "name": "soy sauce",
-      "cost": 30,
-      "unlocked": true,
-      "category": "condiment"
-    },
-    {
-      "name": "tamarind",
-      "cost": 40,
-      "unlocked": true,
-      "category": "fruit"
-    },
-    {
-      "name": "noodles",
-      "cost": 40,
-      "unlocked": true,
-      "category": "grain"
-    },
-    {
-      "name": "cabbage",
-      "cost": 30,
-      "unlocked": true,
-      "category": "vegetable"
-    },
-    {
-      "name": "ground pork",
-      "cost": 60,
-      "unlocked": true,
-      "category": "protein"
-    },
-    {
-      "name": "wrapper",
-      "cost": 40,
-      "unlocked": true,
-      "category": "other"
-    },
-    {
-      "name": "pork belly",
-      "cost": 70,
-      "unlocked": true,
-      "category": "protein"
-    },
-    {
-      "name": "salt",
-      "cost": 20,
-      "unlocked": true,
-      "category": "condiment"
-    },
-    {
-      "name": "oil",
-      "cost": 30,
-      "unlocked": true,
-      "category": "condiment"
-    },
-    {
-      "name": "oxtail",
-      "cost": 80,
-      "unlocked": true,
-      "category": "protein"
-    },
-    {
-      "name": "peanut butter",
-      "cost": 50,
-      "unlocked": true,
-      "category": "condiment"
-    },
-    {
-      "name": "eggplant",
-      "cost": 40,
-      "unlocked": true,
-      "category": "vegetable"
-    },
-    {
-      "name": "string beans",
-      "cost": 40,
-      "unlocked": true,
-      "category": "vegetable"
-    },
-    {
-      "name": "ginger",
-      "cost": 30,
-      "unlocked": true,
-      "category": "vegetable"
-    },
-    {
-      "name": "chili leaves",
-      "cost": 40,
-      "unlocked": true,
-      "category": "vegetable"
-    },
-    {
-      "name": "green papaya",
-      "cost": 50,
-      "unlocked": true,
-      "category": "fruit"
-    },
-    {
-      "name": "pork face",
-      "cost": 70,
-      "unlocked": true,
-      "category": "protein"
-    },
-    {
-      "name": "chili",
-      "cost": 30,
-      "unlocked": true,
-      "category": "vegetable"
-    },
-    {
-      "name": "calamansi",
-      "cost": 40,
-      "unlocked": true,
-      "category": "fruit"
-    },
-    {
-      "name": "coconut milk",
-      "cost": 50,
-      "unlocked": true,
-      "category": "condiment"
-    },
-    {
-      "name": "shrimp paste",
-      "cost": 40,
-      "unlocked": true,
-      "category": "condiment"
-    },
-    {
-      "name": "brown sugar",
-      "cost": 30,
-      "unlocked": false,
-      "category": "condiment"
+      "category": "advanced"
     }
   ],
   "tools": [
@@ -210,43 +66,31 @@
       "name": "pan",
       "cost": 0,
       "unlocked": true,
-      "category": "cooking"
+      "category": "basic"
     },
     {
       "name": "pot",
       "cost": 0,
       "unlocked": true,
-      "category": "cooking"
+      "category": "basic"
     },
     {
       "name": "oven",
       "cost": 100,
       "unlocked": false,
-      "category": "cooking"
+      "category": "advanced"
     },
     {
       "name": "grill",
       "cost": 100,
       "unlocked": false,
-      "category": "cooking"
+      "category": "advanced"
     },
     {
       "name": "blender",
       "cost": 100,
-      "unlocked": true,
-      "category": "preparation"
-    },
-    {
-      "name": "wok",
-      "cost": 120,
       "unlocked": false,
-      "category": "cooking"
-    },
-    {
-      "name": "steamer",
-      "cost": 80,
-      "unlocked": false,
-      "category": "cooking"
+      "category": "advanced"
     }
   ]
 }

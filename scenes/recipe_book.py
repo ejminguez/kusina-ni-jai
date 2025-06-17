@@ -4,7 +4,7 @@ Recipe book scene for viewing discovered recipes
 import pygame
 from ui.buttons import Button
 from ui.text import TextRenderer
-from config import SCREEN_WIDTH, SCREEN_HEIGHT, BLACK, LIGHT_GRAY, BEIGE
+from config import SCREEN_WIDTH, SCREEN_HEIGHT, BLACK, LIGHT_GRAY, BEIGE, PASTEL_COLORS
 
 class RecipeBook:
     def __init__(self, recipe_system):
@@ -26,6 +26,13 @@ class RecipeBook:
         # Table of contents mode
         self.show_table_of_contents = True
         self.toc_buttons = []
+        
+        # Scrolling for table of contents
+        self.scroll_offset = 0
+        self.max_scroll = 0
+        self.scroll_speed = 20
+        self.scroll_area_height = SCREEN_HEIGHT - 250  # Area available for scrolling
+        
         self.update_toc_buttons()
         
     def update_toc_buttons(self):
@@ -33,9 +40,9 @@ class RecipeBook:
         self.toc_buttons = []
         discovered_recipes = self.recipe_system.get_discovered_recipes()
         
-        button_height = 40
-        button_width = 300
-        button_margin = 10
+        button_height = 50  # Increased height for better spacing
+        button_width = 400  # Wider buttons for longer recipe names
+        button_margin = 15  # More margin between buttons
         start_y = 150
         
         for i, recipe in enumerate(discovered_recipes):
@@ -45,6 +52,14 @@ class RecipeBook:
                 "recipe": recipe,
                 "index": i
             })
+            
+        # Calculate max scroll based on content height
+        if self.toc_buttons:
+            last_button = self.toc_buttons[-1]
+            content_height = last_button["rect"].bottom - 150
+            self.max_scroll = max(0, content_height - self.scroll_area_height)
+        else:
+            self.max_scroll = 0
         
     def handle_events(self, events):
         """Handle events for the recipe book
@@ -59,22 +74,38 @@ class RecipeBook:
         
         # Update button hover states
         self.back_button.is_hovered(mouse_pos)
-        self.next_button.is_hovered(mouse_pos)
-        self.prev_button.is_hovered(mouse_pos)
+        
+        if not self.show_table_of_contents:
+            self.next_button.is_hovered(mouse_pos)
+            self.prev_button.is_hovered(mouse_pos)
         
         for event in events:
             # Check back button
             if self.back_button.is_clicked(mouse_pos, event):
                 return "game"
                 
+            # Handle scrolling in table of contents
+            if self.show_table_of_contents and event.type == pygame.MOUSEWHEEL:
+                self.scroll_offset -= event.y * self.scroll_speed
+                self.scroll_offset = max(0, min(self.scroll_offset, self.max_scroll))
+                continue  # Skip further processing for mousewheel events
+                
             if self.show_table_of_contents:
                 # Check table of contents buttons
-                for button in self.toc_buttons:
-                    if button["rect"].collidepoint(mouse_pos) and event.type == pygame.MOUSEBUTTONDOWN:
-                        self.current_page = button["index"]
-                        self.selected_recipe = button["recipe"]
-                        self.show_table_of_contents = False
-                        return None
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # Left click only
+                    # Adjust mouse position for scrolling
+                    scroll_adjusted_pos = (mouse_pos[0], mouse_pos[1] + self.scroll_offset)
+                    
+                    for button in self.toc_buttons:
+                        # Only check buttons that are in the visible area
+                        button_rect = button["rect"].copy()
+                        button_rect.y -= self.scroll_offset
+                        
+                        if 150 <= button_rect.y <= SCREEN_HEIGHT - 100 and button_rect.collidepoint(mouse_pos):
+                            self.current_page = button["index"]
+                            self.selected_recipe = button["recipe"]
+                            self.show_table_of_contents = False
+                            return None
             else:
                 # Check navigation buttons
                 if self.next_button.is_clicked(mouse_pos, event):
@@ -85,7 +116,7 @@ class RecipeBook:
                     
                 # Check for table of contents button
                 toc_button_rect = pygame.Rect(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT - 70, 200, 40)
-                if toc_button_rect.collidepoint(mouse_pos) and event.type == pygame.MOUSEBUTTONDOWN:
+                if toc_button_rect.collidepoint(mouse_pos) and event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     self.show_table_of_contents = True
                     self.update_toc_buttons()
                     return None
@@ -177,34 +208,55 @@ class RecipeBook:
             "center"
         )
         
-        # Draw recipe buttons
+        # Create a clipping rect for the scrollable area
+        scroll_area = pygame.Rect(0, 150, SCREEN_WIDTH, self.scroll_area_height)
+        
+        # Draw scrollbar if needed
+        if self.max_scroll > 0:
+            scrollbar_height = self.scroll_area_height * (self.scroll_area_height / (self.scroll_area_height + self.max_scroll))
+            scrollbar_pos = 150 + (self.scroll_offset / self.max_scroll) * (self.scroll_area_height - scrollbar_height)
+            pygame.draw.rect(screen, (150, 150, 150), (SCREEN_WIDTH - 20, scrollbar_pos, 10, scrollbar_height))
+            pygame.draw.rect(screen, BLACK, (SCREEN_WIDTH - 20, scrollbar_pos, 10, scrollbar_height), 1)
+        
+        # Draw recipe buttons (with scrolling)
         for button in self.toc_buttons:
-            # Draw button background
-            pygame.draw.rect(screen, (220, 220, 220), button["rect"])
-            pygame.draw.rect(screen, BLACK, button["rect"], 2)
+            # Adjust button position for scrolling
+            button_rect = button["rect"].copy()
+            button_rect.y -= self.scroll_offset
             
-            # Draw recipe name
-            self.text_renderer.render_text(
-                screen,
-                button["recipe"].name,
-                "medium",
-                BLACK,
-                button["rect"].centerx,
-                button["rect"].centery,
-                "center"
-            )
-            
-            # Draw difficulty stars
-            difficulty_stars = "★" * button["recipe"].difficulty
-            self.text_renderer.render_text(
-                screen,
-                f"Difficulty: {difficulty_stars}",
-                "small",
-                BLACK,
-                button["rect"].right - 10,
-                button["rect"].centery,
-                "right"
-            )
+            # Only draw buttons that are in the visible area
+            if scroll_area.colliderect(button_rect):
+                # Draw button background
+                pygame.draw.rect(screen, PASTEL_COLORS[1], button_rect)
+                pygame.draw.rect(screen, BLACK, button_rect, 2)
+                
+                # Draw recipe name (truncate if too long)
+                recipe_name = button["recipe"].name
+                max_name_length = 30  # Increased from 20
+                if len(recipe_name) > max_name_length:
+                    recipe_name = recipe_name[:max_name_length-3] + "..."
+                    
+                self.text_renderer.render_text(
+                    screen,
+                    recipe_name,
+                    "medium",
+                    BLACK,
+                    button_rect.centerx,
+                    button_rect.centery - 10,  # Move up to make room for difficulty
+                    "center"
+                )
+                
+                # Draw difficulty stars
+                difficulty_stars = "★" * button["recipe"].difficulty
+                self.text_renderer.render_text(
+                    screen,
+                    f"Difficulty: {difficulty_stars}",
+                    "small",
+                    BLACK,
+                    button_rect.centerx,
+                    button_rect.centery + 15,  # Position below recipe name
+                    "center"
+                )
             
     def _render_recipe_page(self, screen, recipes):
         """Render a recipe page
@@ -240,22 +292,52 @@ class RecipeBook:
         book_y = 100
         
         # Draw book border
-        pygame.draw.rect(screen, (220, 220, 220), (book_x, book_y, book_width, book_height))
+        pygame.draw.rect(screen, PASTEL_COLORS[6], (book_x, book_y, book_width, book_height))
         pygame.draw.rect(screen, BLACK, (book_x, book_y, book_width, book_height), 2)
         
-        # Draw recipe name
-        self.text_renderer.render_text(
-            screen,
-            recipe.name,
-            "large",
-            BLACK,
-            SCREEN_WIDTH // 2,
-            book_y + 40,
-            "center"
-        )
+        # Draw recipe name (wrap if too long)
+        recipe_name = recipe.name
+        if len(recipe_name) > 25:
+            # Split into multiple lines
+            words = recipe_name.split()
+            lines = []
+            current_line = ""
+            
+            for word in words:
+                if len(current_line + " " + word) <= 25:
+                    current_line += " " + word if current_line else word
+                else:
+                    lines.append(current_line)
+                    current_line = word
+                    
+            if current_line:
+                lines.append(current_line)
+                
+            # Draw each line
+            for i, line in enumerate(lines):
+                self.text_renderer.render_text(
+                    screen,
+                    line,
+                    "large" if i == 0 else "medium",
+                    BLACK,
+                    SCREEN_WIDTH // 2,
+                    book_y + 30 + i * 30,
+                    "center"
+                )
+        else:
+            # Draw as a single line
+            self.text_renderer.render_text(
+                screen,
+                recipe_name,
+                "large",
+                BLACK,
+                SCREEN_WIDTH // 2,
+                book_y + 40,
+                "center"
+            )
         
         # Draw decorative line
-        line_y = book_y + 70
+        line_y = book_y + 100
         pygame.draw.line(screen, BLACK, (book_x + 50, line_y), (book_x + book_width - 50, line_y), 2)
         
         # Difficulty
@@ -266,7 +348,7 @@ class RecipeBook:
             "medium",
             BLACK,
             SCREEN_WIDTH // 2,
-            book_y + 100,
+            book_y + 130,
             "center"
         )
         
@@ -277,7 +359,7 @@ class RecipeBook:
             "medium",
             BLACK,
             SCREEN_WIDTH // 2,
-            book_y + 130,
+            book_y + 160,
             "center"
         )
         
@@ -288,7 +370,7 @@ class RecipeBook:
             "medium",
             BLACK,
             book_x + 50,
-            book_y + 180,
+            book_y + 200,
             "left"
         )
         
@@ -299,12 +381,12 @@ class RecipeBook:
                 "small",
                 BLACK,
                 book_x + 70,
-                book_y + 210 + i * 25,
+                book_y + 230 + i * 25,
                 "left"
             )
             
         # Tools
-        tools_y = book_y + 210 + len(recipe.ingredients) * 25 + 20
+        tools_y = book_y + 230 + len(recipe.ingredients) * 25 + 20
         self.text_renderer.render_text(
             screen,
             "Tools:",
@@ -335,7 +417,7 @@ class RecipeBook:
             
         # Draw table of contents button
         toc_button_rect = pygame.Rect(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT - 70, 200, 40)
-        pygame.draw.rect(screen, (220, 220, 220), toc_button_rect)
+        pygame.draw.rect(screen, PASTEL_COLORS[1], toc_button_rect)
         pygame.draw.rect(screen, BLACK, toc_button_rect, 2)
         
         self.text_renderer.render_text(

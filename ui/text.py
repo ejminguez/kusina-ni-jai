@@ -20,12 +20,21 @@ class TextRenderer:
             screen: Pygame surface to render on
             text: Text string to render
             size: Font size ('small', 'medium', 'large', 'title')
-            color: RGB color tuple
+            color: RGB or RGBA color tuple
             x, y: Position coordinates
             align: Text alignment ('left', 'center', 'right')
         """
         font = self.fonts.get(size, self.fonts['medium'])
-        text_surface = font.render(text, True, color)
+        
+        # Handle RGBA colors
+        if len(color) == 4:
+            # Create a surface with per-pixel alpha
+            text_surface = font.render(text, True, color[:3])
+            alpha_surface = pygame.Surface(text_surface.get_size(), pygame.SRCALPHA)
+            alpha_surface.fill((255, 255, 255, color[3]))
+            text_surface.blit(alpha_surface, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+        else:
+            text_surface = font.render(text, True, color)
         
         if align == "center":
             text_rect = text_surface.get_rect(center=(x, y))
@@ -44,7 +53,7 @@ class TextRenderer:
             screen: Pygame surface to render on
             text_lines: List of text strings
             size: Font size ('small', 'medium', 'large', 'title')
-            color: RGB color tuple
+            color: RGB or RGBA color tuple
             x, y: Position of first line
             line_spacing: Vertical space between lines
             align: Text alignment ('left', 'center', 'right')
@@ -54,6 +63,41 @@ class TextRenderer:
         
         for i, line in enumerate(text_lines):
             self.render_text(screen, line, size, color, x, y + i * height, align)
+            
+    def render_wrapped_text(self, screen, text, size, color, x, y, max_width, align="left"):
+        """Render text wrapped to fit within a maximum width
+        
+        Args:
+            screen: Pygame surface to render on
+            text: Text string to render
+            size: Font size ('small', 'medium', 'large', 'title')
+            color: RGB or RGBA color tuple
+            x, y: Position coordinates
+            max_width: Maximum width in pixels
+            align: Text alignment ('left', 'center', 'right')
+        """
+        font = self.fonts.get(size, self.fonts['medium'])
+        words = text.split(' ')
+        lines = []
+        current_line = ""
+        
+        for word in words:
+            test_line = current_line + word + " "
+            test_width = font.size(test_line)[0]
+            
+            if test_width <= max_width:
+                current_line = test_line
+            else:
+                lines.append(current_line)
+                current_line = word + " "
+                
+        if current_line:
+            lines.append(current_line)
+            
+        line_height = font.get_height()
+        
+        for i, line in enumerate(lines):
+            self.render_text(screen, line, size, color, x, y + i * line_height, align)
             
     def render_patience_bar(self, screen, x, y, width, height, patience_pct):
         """Render a patience bar with color based on percentage

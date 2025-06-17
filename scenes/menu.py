@@ -170,7 +170,7 @@ class MainMenu:
         
     def _reset_game(self):
         """Reset the game by deleting save files"""
-        save_files = ["data/save.json", "data/profile.json"]
+        save_files = ["data/save.json", "data/profile.json", "data/game_state.json"]
         for file in save_files:
             if os.path.exists(file):
                 try:

@@ -55,240 +55,41 @@
       "discovered": true
     },
     {
-      "name": "Adobo",
+      "name": "Beef And Potato",
       "ingredients": [
-        "chicken",
-        "garlic",
-        "vinegar",
-        "soy sauce"
+        "beef",
+        "potato"
       ],
       "tools": [
         "pot"
       ],
       "cooking_time": 60,
-      "difficulty": 3,
-      "discovered": false
+      "difficulty": 2,
+      "discovered": true
     },
     {
-      "name": "Sinigang",
+      "name": "Egg And Tomato Mix",
       "ingredients": [
-        "pork",
+        "egg",
         "tomato",
-        "onion",
-        "tamarind"
+        "onion"
       ],
       "tools": [
         "pot"
-      ],
-      "cooking_time": 75,
-      "difficulty": 3,
-      "discovered": false
-    },
-    {
-      "name": "Pancit Canton",
-      "ingredients": [
-        "noodles",
-        "chicken",
-        "carrot",
-        "cabbage"
-      ],
-      "tools": [
-        "pan"
-      ],
-      "cooking_time": 45,
-      "difficulty": 2,
-      "discovered": false
-    },
-    {
-      "name": "Lumpia",
-      "ingredients": [
-        "ground pork",
-        "carrot",
-        "onion",
-        "wrapper"
-      ],
-      "tools": [
-        "pan"
-      ],
-      "cooking_time": 40,
-      "difficulty": 3,
-      "discovered": false
-    },
-    {
-      "name": "Lechon Kawali",
-      "ingredients": [
-        "pork belly",
-        "salt",
-        "oil"
-      ],
-      "tools": [
-        "pot",
-        "pan"
-      ],
-      "cooking_time": 90,
-      "difficulty": 4,
-      "discovered": false
-    },
-    {
-      "name": "Kare-Kare",
-      "ingredients": [
-        "oxtail",
-        "peanut butter",
-        "eggplant",
-        "string beans"
-      ],
-      "tools": [
-        "pot"
-      ],
-      "cooking_time": 120,
-      "difficulty": 5,
-      "discovered": false
-    },
-    {
-      "name": "Tinola",
-      "ingredients": [
-        "chicken",
-        "ginger",
-        "chili leaves",
-        "green papaya"
-      ],
-      "tools": [
-        "pot"
-      ],
-      "cooking_time": 60,
-      "difficulty": 2,
-      "discovered": false
-    },
-    {
-      "name": "Sisig",
-      "ingredients": [
-        "pork face",
-        "onion",
-        "chili",
-        "calamansi"
-      ],
-      "tools": [
-        "pan"
-      ],
-      "cooking_time": 50,
-      "difficulty": 4,
-      "discovered": false
-    },
-    {
-      "name": "Bicol Express",
-      "ingredients": [
-        "pork",
-        "coconut milk",
-        "chili",
-        "shrimp paste"
-      ],
-      "tools": [
-        "pot"
-      ],
-      "cooking_time": 55,
-      "difficulty": 3,
-      "discovered": false
-    },
-    {
-      "name": "Humba",
-      "ingredients": [
-        "pork belly",
-        "soy sauce",
-        "vinegar",
-        "brown sugar"
-      ],
-      "tools": [
-        "pot"
-      ],
-      "cooking_time": 80,
-      "difficulty": 3,
-      "discovered": false
-    },
-    {
-      "name": "Garlic And Rice",
-      "ingredients": [
-        "garlic",
-        "rice"
-      ],
-      "tools": [
-        "pan"
       ],
       "cooking_time": 60,
       "difficulty": 2,
       "discovered": true
     },
     {
-      "name": "Rice And Tomato",
+      "name": "Beef And Tomato Mix",
       "ingredients": [
-        "rice",
-        "tomato"
-      ],
-      "tools": [
-        "pot",
-        "pan"
-      ],
-      "cooking_time": 60,
-      "difficulty": 2,
-      "discovered": true
-    },
-    {
-      "name": "Chicken And Tamarind Mix",
-      "ingredients": [
-        "chicken",
-        "tamarind",
-        "chili"
-      ],
-      "tools": [
-        "pan"
-      ],
-      "cooking_time": 60,
-      "difficulty": 2,
-      "discovered": true
-    },
-    {
-      "name": "Noodles And Tamarind",
-      "ingredients": [
-        "noodles",
-        "tamarind"
-      ],
-      "tools": [
-        "pan"
-      ],
-      "cooking_time": 60,
-      "difficulty": 2,
-      "discovered": true
-    },
-    {
-      "name": "Tomato And Egg",
-      "ingredients": [
+        "beef",
         "tomato",
         "egg"
       ],
       "tools": [
         "pot"
-      ],
-      "cooking_time": 60,
-      "difficulty": 2,
-      "discovered": true
-    },
-    {
-      "name": "Green Papaya And Eggplant Mix",
-      "ingredients": [
-        "green papaya",
-        "eggplant",
-        "chili leaves",
-        "pork face",
-        "ginger",
-        "string beans",
-        "peanut butter",
-        "oxtail",
-        "salt",
-        "oil",
-        "pork belly",
-        "wrapper"
-      ],
-      "tools": [
-        "blender"
       ],
       "cooking_time": 60,
       "difficulty": 2,
