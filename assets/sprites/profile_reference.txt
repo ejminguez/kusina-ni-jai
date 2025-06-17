@@ -1,0 +1,18 @@
++------------------+
+|                  |
+|      ______      |
+|     /      \     |
+|    |  o  o  |    |
+|    |   __   |    |
+|     \______/     |
+|       |  |       |
+|     __|__|__     |
+|    /        \    |
+|   /          \   |
+|                  |
++------------------+
+
+Chef 1: Standard chef with traditional hat
+Chef 2: Female chef with ponytail
+Chef 3: Young chef with bandana
+Default: Simple chef silhouette

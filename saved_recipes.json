@@ -1,0 +1,83 @@
+[
+  {
+    "name": "Fried Rice",
+    "ingredients": [
+      "rice",
+      "egg",
+      "garlic",
+      "onion"
+    ],
+    "tools": [
+      "pan"
+    ],
+    "cooking_time": 60,
+    "difficulty": 1,
+    "discovered": false
+  },
+  {
+    "name": "Scrambled Eggs",
+    "ingredients": [
+      "egg"
+    ],
+    "tools": [
+      "pan"
+    ],
+    "cooking_time": 30,
+    "difficulty": 1,
+    "discovered": false
+  },
+  {
+    "name": "Tomato Omelette",
+    "ingredients": [
+      "egg",
+      "tomato",
+      "onion"
+    ],
+    "tools": [
+      "pan"
+    ],
+    "cooking_time": 45,
+    "difficulty": 2,
+    "discovered": false
+  },
+  {
+    "name": "Garlic Rice",
+    "ingredients": [
+      "rice",
+      "garlic"
+    ],
+    "tools": [
+      "pot"
+    ],
+    "cooking_time": 40,
+    "difficulty": 1,
+    "discovered": false
+  },
+  {
+    "name": "Garlic And Chicken Mix",
+    "ingredients": [
+      "garlic",
+      "chicken",
+      "onion"
+    ],
+    "tools": [
+      "pot"
+    ],
+    "cooking_time": 60,
+    "difficulty": 2,
+    "discovered": true
+  },
+  {
+    "name": "Chicken And Garlic",
+    "ingredients": [
+      "chicken",
+      "garlic"
+    ],
+    "tools": [
+      "pot"
+    ],
+    "cooking_time": 60,
+    "difficulty": 2,
+    "discovered": true
+  }
+]
