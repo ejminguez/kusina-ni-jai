@@ -75,3 +75,23 @@ class ToolButton(ToggleButton):
 class CookButton(Button):
     def __init__(self, x, y, width, height, text="Cook!", color=RED, text_color=BLACK, font_size=32):
         super().__init__(x, y, width, height, text, color, text_color, font_size)
+
+
+class ColorButton(Button):
+    def __init__(self, x, y, width, height, text="", color=(255, 0, 0), text_color=BLACK, font_size=24):
+        super().__init__(x, y, width, height, text, color, text_color, font_size)
+        
+    def draw(self, screen):
+        # Draw color button (no text)
+        pygame.draw.rect(screen, self.color, self.rect)
+        pygame.draw.rect(screen, BLACK, self.rect, 2)
+        
+        # Draw highlight when hovered
+        if self.hovered:
+            highlight_rect = pygame.Rect(
+                self.rect.x - 2,
+                self.rect.y - 2,
+                self.rect.width + 4,
+                self.rect.height + 4
+            )
+            pygame.draw.rect(screen, (255, 255, 255), highlight_rect, 2)

@@ -43,6 +43,7 @@ class Customer:
         Returns:
             bool: True if the dish matches the order
         """
+        # Case-insensitive comparison
         if dish_name.lower() == self.order.lower():
             self.served = True
             return True
@@ -64,7 +65,7 @@ class CustomerSystem:
         self.customer_spawn_timer = 0
         self.customer_spawn_interval = CUSTOMER_SPAWN_INTERVAL  # milliseconds between customers
         self.last_spawn_time = pygame.time.get_ticks()
-        self.customer_names = FILIPINO_NAMES
+        self.customer_names = FILIPINO_NAMES if FILIPINO_NAMES else ["Alex", "Jamie", "Casey", "Jordan", "Taylor"]
         
     def update(self):
         """Update all customers and spawn new ones if needed
@@ -116,10 +117,14 @@ class CustomerSystem:
             order = self._generate_custom_order()
             
         # Set reward based on recipe difficulty or randomness for custom orders
-        if order in self.recipe_system.recipes:
-            recipe = self.recipe_system.get_recipe(order)
-            reward = recipe.difficulty * 20 + random.randint(5, 15)
-        else:
+        recipe_found = False
+        for recipe in self.recipe_system.recipes.values():
+            if recipe.name.lower() == order.lower():
+                reward = recipe.difficulty * 20 + random.randint(5, 15)
+                recipe_found = True
+                break
+                
+        if not recipe_found:
             # Custom orders pay more
             reward = random.randint(40, 80)
             

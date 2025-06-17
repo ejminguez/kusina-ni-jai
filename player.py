@@ -17,6 +17,7 @@ class Player:
         self.experience_to_next_level = XP_TO_LEVEL
         self.username = DEFAULT_USERNAME
         self.profile_pic = DEFAULT_PROFILE_PIC
+        self.color = (0, 255, 0)  # Default color (green)
         self.consecutive_lost_customers = 0
         self.load_player_data()
         
@@ -42,6 +43,10 @@ class Player:
                     data = json.load(file)
                     self.username = data.get("username", DEFAULT_USERNAME)
                     self.profile_pic = data.get("profile_pic", DEFAULT_PROFILE_PIC)
+                    
+                    # Load color as a list and convert to tuple
+                    color_list = data.get("color", [0, 255, 0])
+                    self.color = tuple(color_list)
             except Exception as e:
                 print(f"Error loading profile data: {e}")
                 
@@ -71,7 +76,8 @@ class Player:
             
             data = {
                 "username": self.username,
-                "profile_pic": self.profile_pic
+                "profile_pic": self.profile_pic,
+                "color": list(self.color)  # Convert tuple to list for JSON serialization
             }
             
             with open(PROFILE_FILE, "w") as file:
@@ -144,6 +150,15 @@ class Player:
             profile_pic: Path to new profile picture
         """
         self.profile_pic = profile_pic
+        self.save_profile_data()
+        
+    def update_color(self, color):
+        """Update player color theme
+        
+        Args:
+            color: RGB color tuple
+        """
+        self.color = color
         self.save_profile_data()
         
     def add_lost_customer(self):

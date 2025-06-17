@@ -4,16 +4,22 @@ Main game loop scene
 import pygame
 from ui.buttons import Button
 from ui.text import TextRenderer
+from ui.animation_manager import AnimationManager, EasingAnimation
 from config import (
     SCREEN_WIDTH, SCREEN_HEIGHT, BLACK, GREEN, BLUE, LIGHT_GRAY,
     MAX_CONSECUTIVE_LOST_CUSTOMERS
 )
 
 class GameScene:
-    def __init__(self, player, customer_system):
+    def __init__(self, player, customer_system, sprite_manager=None):
         self.player = player
         self.customer_system = customer_system
+        self.sprite_manager = sprite_manager
         self.text_renderer = TextRenderer()
+        
+        # Animation manager
+        self.animation_manager = AnimationManager()
+        self._setup_animations()
         
         # UI elements
         self.cooking_button = Button(50, 600, 150, 50, "Cook", GREEN)
@@ -36,6 +42,35 @@ class GameScene:
         self.resume_button = Button(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 - 60, 200, 50, "Resume")
         self.pause_menu_button = Button(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2, 200, 50, "Main Menu")
         self.pause_exit_button = Button(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 + 60, 200, 50, "Exit Game")
+        
+        # Customer animations
+        self.customer_animations = {}
+        
+    def _setup_animations(self):
+        """Set up animations"""
+        # Button hover animations
+        self.animation_manager.create_easing_animation(
+            "button_hover", 
+            0.3, 
+            EasingAnimation.EASING_EASE_OUT, 
+            False
+        )
+        
+        # Message fade animation
+        self.animation_manager.create_easing_animation(
+            "message_fade", 
+            0.5, 
+            EasingAnimation.EASING_EASE_IN_OUT, 
+            False
+        )
+        
+        # Pause menu animation
+        self.animation_manager.create_easing_animation(
+            "pause_menu", 
+            0.3, 
+            EasingAnimation.EASING_EASE_OUT, 
+            False
+        )
         
     def handle_events(self, events):
         """Handle events for the game scene
@@ -104,6 +139,10 @@ class GameScene:
             if self.pause_button.is_clicked(mouse_pos, event):
                 self.paused = True
                 self.pause_menu_active = True
+                # Reset and start pause menu animation
+                pause_anim = self.animation_manager.get_animation("pause_menu")
+                if pause_anim:
+                    pause_anim.reset()
                 
         return None
         
@@ -117,6 +156,9 @@ class GameScene:
             list: List of events that occurred during update
             str or None: Next scene if game over
         """
+        # Update animations
+        self.animation_manager.update(dt)
+        
         # Don't update if paused
         if self.paused:
             return [], None
@@ -166,6 +208,11 @@ class GameScene:
         self.message = message
         self.message_timer = duration
         
+        # Reset and start message fade animation
+        message_anim = self.animation_manager.get_animation("message_fade")
+        if message_anim:
+            message_anim.reset()
+        
     def render(self, screen):
         """Render the game scene
         
@@ -192,11 +239,25 @@ class GameScene:
         
         # Render message if active
         if self.message:
+            # Get message fade animation progress
+            message_anim = self.animation_manager.get_animation("message_fade")
+            opacity = 1.0
+            if message_anim:
+                # Fade in for the first half of the message duration
+                if self.message_timer > 0:
+                    time_ratio = min(1.0, (2.0 - self.message_timer) / 2.0)
+                    opacity = message_anim.get_progress() if time_ratio < 0.5 else 1.0
+                else:
+                    opacity = 0.0
+            
+            # Apply opacity to text color
+            text_color = (0, 0, 0, int(255 * opacity))
+            
             self.text_renderer.render_text(
                 screen,
                 self.message,
                 "medium",
-                BLACK,
+                text_color,
                 SCREEN_WIDTH // 2,
                 500,
                 "center"
@@ -212,26 +273,57 @@ class GameScene:
         Args:
             screen: Pygame surface to render on
         """
-        # Semi-transparent overlay
+        # Get pause menu animation progress
+        pause_anim = self.animation_manager.get_animation("pause_menu")
+        progress = pause_anim.get_progress() if pause_anim else 1.0
+        
+        # Semi-transparent overlay with animation
         overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
-        overlay.fill((0, 0, 0, 180))  # Black with alpha
+        overlay.fill((0, 0, 0, int(180 * progress)))  # Black with animated alpha
         screen.blit(overlay, (0, 0))
         
-        # Pause menu title
-        self.text_renderer.render_text(
-            screen,
-            "PAUSED",
-            "title",
-            (255, 255, 255),
-            SCREEN_WIDTH // 2,
-            SCREEN_HEIGHT // 2 - 150,
-            "center"
-        )
+        # Pause menu title with scale animation
+        scale = 0.5 + 0.5 * progress  # Scale from 0.5 to 1.0
+        title_font = pygame.font.SysFont(None, int(64 * scale))
+        title_text = title_font.render("PAUSED", True, (255, 255, 255))
+        title_rect = title_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 150))
+        screen.blit(title_text, title_rect)
         
-        # Pause menu buttons
-        self.resume_button.draw(screen)
-        self.pause_menu_button.draw(screen)
-        self.pause_exit_button.draw(screen)
+        # Pause menu buttons with fade-in
+        if progress > 0.5:  # Only show buttons after overlay is mostly visible
+            button_alpha = min(255, int(255 * (progress - 0.5) * 2))
+            
+            # Store original colors
+            resume_color = self.resume_button.color
+            menu_color = self.pause_menu_button.color
+            exit_color = self.pause_exit_button.color
+            
+            # Apply alpha to button colors
+            self.resume_button.color = self._apply_alpha_to_color(resume_color, button_alpha)
+            self.pause_menu_button.color = self._apply_alpha_to_color(menu_color, button_alpha)
+            self.pause_exit_button.color = self._apply_alpha_to_color(exit_color, button_alpha)
+            
+            # Draw buttons
+            self.resume_button.draw(screen)
+            self.pause_menu_button.draw(screen)
+            self.pause_exit_button.draw(screen)
+            
+            # Restore original colors
+            self.resume_button.color = resume_color
+            self.pause_menu_button.color = menu_color
+            self.pause_exit_button.color = exit_color
+            
+    def _apply_alpha_to_color(self, color, alpha):
+        """Apply alpha to a color
+        
+        Args:
+            color: RGB color tuple
+            alpha: Alpha value (0-255)
+            
+        Returns:
+            tuple: RGBA color tuple
+        """
+        return (color[0], color[1], color[2], alpha)
             
     def _render_customers(self, screen):
         """Render the customer area
@@ -253,10 +345,29 @@ class GameScene:
             if i < len(self.customer_system.customers):
                 customer = list(self.customer_system.customers)[i]
                 
-                # Draw customer icon (placeholder circle)
-                pygame.draw.circle(screen, (100, 100, 100), 
-                                  (i * slot_width + slot_width // 2, 40), 
-                                  20)
+                # Create animation for this customer if it doesn't exist
+                customer_id = id(customer)
+                if customer_id not in self.customer_animations:
+                    self.animation_manager.create_easing_animation(
+                        f"customer_{customer_id}",
+                        0.5,
+                        EasingAnimation.EASING_BOUNCE,
+                        False
+                    )
+                    self.customer_animations[customer_id] = True
+                
+                # Get animation progress
+                anim = self.animation_manager.get_animation(f"customer_{customer_id}")
+                progress = anim.get_progress() if anim else 1.0
+                
+                # Draw customer icon with animation
+                icon_size = 20 + int(10 * progress)  # Size grows from 20 to 30
+                pygame.draw.circle(
+                    screen, 
+                    (100, 100, 100), 
+                    (i * slot_width + slot_width // 2, 40), 
+                    icon_size
+                )
                 
                 # Draw customer name
                 self.text_renderer.render_text(
@@ -302,11 +413,26 @@ class GameScene:
         Args:
             screen: Pygame surface to render on
         """
-        # Draw profile picture (placeholder)
+        # Draw profile picture
         profile_rect = pygame.Rect(20, 170, 60, 60)
-        pygame.draw.rect(screen, (200, 200, 200), profile_rect)
-        pygame.draw.rect(screen, BLACK, profile_rect, 2)
-        pygame.draw.circle(screen, (150, 150, 150), profile_rect.center, 25)
+        
+        # Draw profile background with player's color
+        player_color = self.player.color if hasattr(self.player, "color") else (0, 255, 0)
+        pygame.draw.rect(screen, player_color, (profile_rect.x - 3, profile_rect.y - 3, profile_rect.width + 6, profile_rect.height + 6))
+        
+        # Draw profile picture
+        if self.sprite_manager:
+            # Extract sprite name from path
+            sprite_name = self.player.profile_pic.split("/")[-1].split(".")[0]
+            sprite = self.sprite_manager.get_sprite(sprite_name)
+            # Scale sprite to fit the profile rect
+            sprite = pygame.transform.scale(sprite, (profile_rect.width, profile_rect.height))
+            screen.blit(sprite, profile_rect)
+        else:
+            # Draw placeholder if sprite manager is not available
+            pygame.draw.rect(screen, (200, 200, 200), profile_rect)
+            pygame.draw.rect(screen, BLACK, profile_rect, 2)
+            pygame.draw.circle(screen, (150, 150, 150), profile_rect.center, 25)
         
         # Draw username
         self.text_renderer.render_text(
@@ -362,6 +488,6 @@ class GameScene:
         # Background bar
         pygame.draw.rect(screen, (200, 200, 200), (bar_x, bar_y, bar_width, bar_height))
         
-        # XP level
-        pygame.draw.rect(screen, (100, 200, 100), (bar_x, bar_y, int(bar_width * xp_pct), bar_height))
+        # XP level with player's color
+        pygame.draw.rect(screen, player_color, (bar_x, bar_y, int(bar_width * xp_pct), bar_height))
         pygame.draw.rect(screen, BLACK, (bar_x, bar_y, bar_width, bar_height), 1)

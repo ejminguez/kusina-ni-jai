@@ -1,4 +1,9 @@
 {
-  "username": "Chef Jai",
-  "profile_pic": "assets/sprites/default_profile.png"
+  "username": "cooking inamo",
+  "profile_pic": "assets/sprites/default_profile.png",
+  "color": [
+    255,
+    165,
+    0
+  ]
 }

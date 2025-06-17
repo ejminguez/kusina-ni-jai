@@ -18,8 +18,14 @@ class RecipeCreator:
         # UI elements
         self.ingredient_buttons = []
         self.tool_buttons = []
-        self.cook_button = CookButton(SCREEN_WIDTH // 2 - 75, 400, 150, 50)
-        self.back_button = Button(50, 500, 100, 40, "Back")
+        self.cook_button = CookButton(SCREEN_WIDTH // 2 - 75, SCREEN_HEIGHT - 150, 150, 50)
+        self.back_button = Button(50, SCREEN_HEIGHT - 70, 100, 40, "Back")
+        
+        # Scrolling
+        self.scroll_offset = 0
+        self.max_scroll = 0
+        self.scroll_speed = 20
+        self.scroll_area_height = SCREEN_HEIGHT - 300  # Area available for scrolling
         
         # Result message
         self.result_message = ""
@@ -33,6 +39,7 @@ class RecipeCreator:
         # Clear existing buttons
         self.ingredient_buttons = []
         self.tool_buttons = []
+        self.scroll_offset = 0
         
         # Get unlocked ingredients and tools
         unlocked_ingredients = self.kitchen.get_unlocked_ingredients()
@@ -70,6 +77,19 @@ class RecipeCreator:
             self.tool_buttons.append(
                 ToolButton(x, y, button_width, button_height, tool)
             )
+            
+        # Calculate max scroll based on content height
+        if self.ingredient_buttons or self.tool_buttons:
+            # Find the button with the lowest position
+            all_buttons = self.ingredient_buttons + self.tool_buttons
+            if all_buttons:
+                last_button = max(all_buttons, key=lambda b: b.rect.bottom)
+                content_height = last_button.rect.bottom - 150
+                self.max_scroll = max(0, content_height - self.scroll_area_height)
+            else:
+                self.max_scroll = 0
+        else:
+            self.max_scroll = 0
         
     def handle_events(self, events):
         """Handle events for the recipe creator
@@ -83,37 +103,58 @@ class RecipeCreator:
         """
         mouse_pos = pygame.mouse.get_pos()
         
-        # Update button hover states
+        # Update button hover states for fixed buttons
         self.cook_button.is_hovered(mouse_pos)
         self.back_button.is_hovered(mouse_pos)
         
+        # Adjust mouse position for scrolling when checking ingredient/tool buttons
+        scroll_adjusted_pos = (mouse_pos[0], mouse_pos[1] + self.scroll_offset)
+        
+        # Update hover states for scrollable buttons
         for button in self.ingredient_buttons:
-            button.is_hovered(mouse_pos)
+            # Only check buttons that are in the visible area
+            button_rect = button.rect
+            if 150 <= button_rect.y - self.scroll_offset <= SCREEN_HEIGHT - 200:
+                button.is_hovered(scroll_adjusted_pos)
             
         for button in self.tool_buttons:
-            button.is_hovered(mouse_pos)
+            # Only check buttons that are in the visible area
+            button_rect = button.rect
+            if 150 <= button_rect.y - self.scroll_offset <= SCREEN_HEIGHT - 200:
+                button.is_hovered(scroll_adjusted_pos)
         
         for event in events:
+            # Handle scrolling
+            if event.type == pygame.MOUSEWHEEL:
+                self.scroll_offset -= event.y * self.scroll_speed
+                self.scroll_offset = max(0, min(self.scroll_offset, self.max_scroll))
+                
             if event.type == pygame.MOUSEBUTTONDOWN:
                 # Check ingredient buttons
                 for button in self.ingredient_buttons:
-                    if button.is_clicked(mouse_pos, event):
-                        if button.toggle():
-                            if button.ingredient_name not in self.selected_ingredients:
-                                self.selected_ingredients.append(button.ingredient_name)
-                        else:
-                            if button.ingredient_name in self.selected_ingredients:
-                                self.selected_ingredients.remove(button.ingredient_name)
+                    # Only check buttons that are in the visible area
+                    button_rect = button.rect
+                    if 150 <= button_rect.y - self.scroll_offset <= SCREEN_HEIGHT - 200:
+                        if button_rect.collidepoint(scroll_adjusted_pos):
+                            if button.toggle():
+                                if button.ingredient_name not in self.selected_ingredients:
+                                    self.selected_ingredients.append(button.ingredient_name)
+                            else:
+                                if button.ingredient_name in self.selected_ingredients:
+                                    self.selected_ingredients.remove(button.ingredient_name)
                 
                 # Check tool buttons
                 for button in self.tool_buttons:
-                    if button.is_clicked(mouse_pos, event):
-                        if button.toggle():
-                            if button.tool_name not in self.selected_tools:
-                                self.selected_tools.append(button.tool_name)
-                        else:
-                            if button.tool_name in self.selected_tools:
-                                self.selected_tools.remove(button.tool_name)
+                    # Only check buttons that are in the visible area
+                    button_rect = button.rect
+                    if 150 <= button_rect.y - self.scroll_offset <= SCREEN_HEIGHT - 200:
+                        if button_rect.collidepoint(scroll_adjusted_pos):
+                            if button.toggle():
+                                if button.tool_name not in self.selected_tools:
+                                    self.selected_tools.append(button.tool_name)
+                            else:
+                                if button.tool_name in self.selected_tools:
+                                    self.selected_tools.remove(button.tool_name)
                 
                 # Check cook button
                 if self.cook_button.is_clicked(mouse_pos, event):
@@ -225,18 +266,56 @@ class RecipeCreator:
             "left"
         )
         
-        # Draw ingredient buttons
+        # Create a clipping rect for the scrollable area
+        scroll_area = pygame.Rect(0, 150, SCREEN_WIDTH, self.scroll_area_height)
+        
+        # Draw scrollbar if needed
+        if self.max_scroll > 0:
+            scrollbar_height = self.scroll_area_height * (self.scroll_area_height / (self.scroll_area_height + self.max_scroll))
+            scrollbar_pos = 150 + (self.scroll_offset / self.max_scroll) * (self.scroll_area_height - scrollbar_height)
+            pygame.draw.rect(screen, (150, 150, 150), (SCREEN_WIDTH - 20, scrollbar_pos, 10, scrollbar_height))
+            pygame.draw.rect(screen, BLACK, (SCREEN_WIDTH - 20, scrollbar_pos, 10, scrollbar_height), 1)
+        
+        # Draw ingredient buttons (with scrolling)
         for button in self.ingredient_buttons:
-            button.draw(screen)
+            # Adjust button position for scrolling
+            button_rect = button.rect.copy()
+            button_rect.y -= self.scroll_offset
+            
+            # Only draw buttons that are in the visible area
+            if scroll_area.colliderect(button_rect):
+                # Store original rect
+                original_rect = button.rect
+                
+                # Temporarily set the rect to the scrolled position
+                button.rect = button_rect
+                button.draw(screen)
+                
+                # Restore original rect
+                button.rect = original_rect
         
-        # Draw tool buttons
+        # Draw tool buttons (with scrolling)
         for button in self.tool_buttons:
-            button.draw(screen)
+            # Adjust button position for scrolling
+            button_rect = button.rect.copy()
+            button_rect.y -= self.scroll_offset
+            
+            # Only draw buttons that are in the visible area
+            if scroll_area.colliderect(button_rect):
+                # Store original rect
+                original_rect = button.rect
+                
+                # Temporarily set the rect to the scrolled position
+                button.rect = button_rect
+                button.draw(screen)
+                
+                # Restore original rect
+                button.rect = original_rect
         
-        # Draw cook button
+        # Draw cook button (fixed position)
         self.cook_button.draw(screen)
         
-        # Draw back button
+        # Draw back button (fixed position)
         self.back_button.draw(screen)
         
         # Draw selected ingredients and tools
@@ -246,9 +325,9 @@ class RecipeCreator:
             selected_text,
             "small",
             BLACK,
-            50,
-            350,
-            "left"
+            SCREEN_WIDTH // 2,
+            SCREEN_HEIGHT - 200,
+            "center"
         )
         
         # Draw result message if active
@@ -259,6 +338,6 @@ class RecipeCreator:
                 "medium",
                 BLACK,
                 SCREEN_WIDTH // 2,
-                500,
+                SCREEN_HEIGHT - 100,
                 "center"
             )

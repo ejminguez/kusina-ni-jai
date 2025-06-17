@@ -20,6 +20,18 @@ RED = (200, 150, 150)
 YELLOW = (255, 255, 0)
 DARK_RED = (180, 0, 0)
 
+# Pastel Colors
+PASTEL_COLORS = [
+    (255, 209, 220),  # Pastel Pink
+    (209, 231, 255),  # Pastel Blue
+    (255, 223, 186),  # Pastel Orange
+    (186, 255, 201),  # Pastel Green
+    (255, 186, 255),  # Pastel Purple
+    (255, 255, 186),  # Pastel Yellow
+    (209, 255, 255),  # Pastel Cyan
+    (235, 222, 240)   # Pastel Lavender
+]
+
 # Game settings
 STARTING_COINS = 100
 STARTING_LEVEL = 1

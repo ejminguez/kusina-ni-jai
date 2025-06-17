@@ -39,13 +39,13 @@
     {
       "name": "beef",
       "cost": 50,
-      "unlocked": false,
+      "unlocked": true,
       "category": "protein"
     },
     {
       "name": "carrot",
       "cost": 50,
-      "unlocked": false,
+      "unlocked": true,
       "category": "vegetable"
     },
     {
@@ -57,19 +57,19 @@
     {
       "name": "potato",
       "cost": 50,
-      "unlocked": false,
+      "unlocked": true,
       "category": "vegetable"
     },
     {
       "name": "pork",
       "cost": 60,
-      "unlocked": false,
+      "unlocked": true,
       "category": "protein"
     },
     {
       "name": "vinegar",
       "cost": 30,
-      "unlocked": false,
+      "unlocked": true,
       "category": "condiment"
     },
     {
@@ -93,25 +93,25 @@
     {
       "name": "cabbage",
       "cost": 30,
-      "unlocked": false,
+      "unlocked": true,
       "category": "vegetable"
     },
     {
       "name": "ground pork",
       "cost": 60,
-      "unlocked": false,
+      "unlocked": true,
       "category": "protein"
     },
     {
       "name": "wrapper",
       "cost": 40,
-      "unlocked": false,
+      "unlocked": true,
       "category": "other"
     },
     {
       "name": "pork belly",
       "cost": 70,
-      "unlocked": false,
+      "unlocked": true,
       "category": "protein"
     },
     {
@@ -123,19 +123,19 @@
     {
       "name": "oil",
       "cost": 30,
-      "unlocked": false,
+      "unlocked": true,
       "category": "condiment"
     },
     {
       "name": "oxtail",
       "cost": 80,
-      "unlocked": false,
+      "unlocked": true,
       "category": "protein"
     },
     {
       "name": "peanut butter",
       "cost": 50,
-      "unlocked": false,
+      "unlocked": true,
       "category": "condiment"
     },
     {
@@ -147,55 +147,55 @@
     {
       "name": "string beans",
       "cost": 40,
-      "unlocked": false,
+      "unlocked": true,
       "category": "vegetable"
     },
     {
       "name": "ginger",
       "cost": 30,
-      "unlocked": false,
+      "unlocked": true,
       "category": "vegetable"
     },
     {
       "name": "chili leaves",
       "cost": 40,
-      "unlocked": false,
+      "unlocked": true,
       "category": "vegetable"
     },
     {
       "name": "green papaya",
       "cost": 50,
-      "unlocked": false,
+      "unlocked": true,
       "category": "fruit"
     },
     {
       "name": "pork face",
       "cost": 70,
-      "unlocked": false,
+      "unlocked": true,
       "category": "protein"
     },
     {
       "name": "chili",
       "cost": 30,
-      "unlocked": false,
+      "unlocked": true,
       "category": "vegetable"
     },
     {
       "name": "calamansi",
       "cost": 40,
-      "unlocked": false,
+      "unlocked": true,
       "category": "fruit"
     },
     {
       "name": "coconut milk",
       "cost": 50,
-      "unlocked": false,
+      "unlocked": true,
       "category": "condiment"
     },
     {
       "name": "shrimp paste",
       "cost": 40,
-      "unlocked": false,
+      "unlocked": true,
       "category": "condiment"
     },
     {
@@ -233,7 +233,7 @@
     {
       "name": "blender",
       "cost": 100,
-      "unlocked": false,
+      "unlocked": true,
       "category": "preparation"
     },
     {

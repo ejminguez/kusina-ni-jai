@@ -8,7 +8,7 @@ import os
 # Make sure we can import from the project root
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from config import SCREEN_WIDTH, SCREEN_HEIGHT, FPS, TITLE
+from config import SCREEN_WIDTH, SCREEN_HEIGHT, FPS, TITLE, PASTEL_COLORS
 from player import Player
 from logic.recipe_logic import RecipeSystem
 from logic.customer import CustomerSystem
@@ -20,17 +20,38 @@ from scenes.upgrade_scene import UpgradeScene
 from scenes.recipe_book import RecipeBook
 from scenes.profile_editor import ProfileEditor
 from scenes.game_over import GameOver
+from scenes.about_scene import AboutScene
+from ui.sprite_manager import SpriteManager
 
 class Game:
     def __init__(self):
         # Initialize pygame
         pygame.init()
-        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        
+        # Get the user's screen resolution
+        info = pygame.display.Info()
+        screen_width = info.current_w
+        screen_height = info.current_h
+        
+        # Set up the display
+        self.fullscreen = False
+        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
         pygame.display.set_caption(TITLE)
         self.clock = pygame.time.Clock()
         self.running = True
         
+        # Initialize sprite manager
+        self.sprite_manager = SpriteManager()
+        self._load_sprites()
+        
         # Initialize game components
+        self._initialize_game_components()
+        
+        # Start with the menu scene
+        self.current_scene = "menu"
+        
+    def _initialize_game_components(self):
+        """Initialize or reinitialize game components"""
         self.player = Player()
         self.recipe_system = RecipeSystem()
         self.kitchen = Kitchen()
@@ -39,16 +60,24 @@ class Game:
         # Initialize scenes
         self.scenes = {
             "menu": MainMenu(),
-            "game": GameScene(self.player, self.customer_system),
+            "game": GameScene(self.player, self.customer_system, self.sprite_manager),
             "cooking": RecipeCreator(self.recipe_system, self.kitchen),
             "upgrade": UpgradeScene(self.player, self.kitchen),
             "recipe_book": RecipeBook(self.recipe_system),
-            "profile": ProfileEditor(self.player),
-            "game_over": GameOver(self.player)
+            "profile": ProfileEditor(self.player, self.sprite_manager),
+            "game_over": GameOver(self.player),
+            "about": AboutScene()
         }
         
-        # Start with the menu scene
-        self.current_scene = "menu"
+    def _load_sprites(self):
+        """Load all game sprites"""
+        # Load profile pictures
+        self.sprite_manager.load_sprite("default_profile", "assets/sprites/default_profile.png")
+        self.sprite_manager.load_sprite("chef1", "assets/sprites/chef1.png")
+        self.sprite_manager.load_sprite("chef2", "assets/sprites/chef2.png")
+        self.sprite_manager.load_sprite("chef3", "assets/sprites/chef3.png")
+        
+        # You can add more sprite loading here
         
     def run(self):
         """Main game loop"""
@@ -61,6 +90,24 @@ class Game:
             for event in events:
                 if event.type == pygame.QUIT:
                     self.running = False
+                    
+                # Handle window resize
+                if event.type == pygame.VIDEORESIZE:
+                    if not self.fullscreen:
+                        self.screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
+                        self.sprite_manager.update_screen_size(event.w, event.h)
+                        
+                # Handle fullscreen toggle
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_F11:
+                        self.fullscreen = not self.fullscreen
+                        if self.fullscreen:
+                            self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+                            info = pygame.display.Info()
+                            self.sprite_manager.update_screen_size(info.current_w, info.current_h)
+                        else:
+                            self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
+                            self.sprite_manager.update_screen_size(SCREEN_WIDTH, SCREEN_HEIGHT)
                     
             # Handle scene-specific events
             next_scene, data = self._handle_scene_events(events)
@@ -141,6 +188,16 @@ class Game:
             data: Optional data to pass to the scene
         """
         if scene_name in self.scenes:
+            # Check for new game request
+            if scene_name == "game" and data and data.get("new_game", False):
+                # Reinitialize game components for a new game
+                self._initialize_game_components()
+            
+            # Special handling for certain scenes
+            if scene_name == "cooking":
+                # Refresh the cooking interface with the latest ingredients
+                self.scenes["cooking"] = RecipeCreator(self.recipe_system, self.kitchen)
+                
             self.current_scene = scene_name
             
             # Handle special scene transitions

@@ -216,6 +216,83 @@
       "cooking_time": 60,
       "difficulty": 2,
       "discovered": true
+    },
+    {
+      "name": "Rice And Tomato",
+      "ingredients": [
+        "rice",
+        "tomato"
+      ],
+      "tools": [
+        "pot",
+        "pan"
+      ],
+      "cooking_time": 60,
+      "difficulty": 2,
+      "discovered": true
+    },
+    {
+      "name": "Chicken And Tamarind Mix",
+      "ingredients": [
+        "chicken",
+        "tamarind",
+        "chili"
+      ],
+      "tools": [
+        "pan"
+      ],
+      "cooking_time": 60,
+      "difficulty": 2,
+      "discovered": true
+    },
+    {
+      "name": "Noodles And Tamarind",
+      "ingredients": [
+        "noodles",
+        "tamarind"
+      ],
+      "tools": [
+        "pan"
+      ],
+      "cooking_time": 60,
+      "difficulty": 2,
+      "discovered": true
+    },
+    {
+      "name": "Tomato And Egg",
+      "ingredients": [
+        "tomato",
+        "egg"
+      ],
+      "tools": [
+        "pot"
+      ],
+      "cooking_time": 60,
+      "difficulty": 2,
+      "discovered": true
+    },
+    {
+      "name": "Green Papaya And Eggplant Mix",
+      "ingredients": [
+        "green papaya",
+        "eggplant",
+        "chili leaves",
+        "pork face",
+        "ginger",
+        "string beans",
+        "peanut butter",
+        "oxtail",
+        "salt",
+        "oil",
+        "pork belly",
+        "wrapper"
+      ],
+      "tools": [
+        "blender"
+      ],
+      "cooking_time": 60,
+      "difficulty": 2,
+      "discovered": true
     }
   ]
 }
